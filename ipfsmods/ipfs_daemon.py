@@ -1,7 +1,7 @@
 # ──────────────────────────────────────────────────────────────────────────────────── I ──────────
 #   :::::: S H I T   I P F S   D A E M O N   C L A S S : :  :   :    :     :        :          :
 # ──────────────────────────────────────────────────────────────────────────────────────────────
-#  ipfs daemon only is available for Go! and NodeJS, this is a custom shit binding
+#  original ipfs daemon only is available for Go! and NodeJS, this is a custom shit binding...
 #
 
 import os
@@ -20,10 +20,14 @@ from bitp2p import logger
 # ─── DAEMON ─────────────────────────────────────────────────────────────────────
 
 class IPFSDaemon(threading.Thread):
+
     # cid is hash returned by ipfs
     # when we add a file with this content:
     # wYGC2SBWDre76hE52cNmFnkv2HKtXGt9Ck7rAnHtKD442W6vgshC5Hjp8Dqe8G9P
+    # ? esto quizas va en otra clase
+    cidcode = "wYGC2SBWDre76hE52cNmFnkv2HKtXGt9Ck7rAnHtKD442W6vgshC5Hjp8Dqe8G9P"
     cid = "QmdT8vz7cLckhnpzw4trHwQWi1mCdrJ8rJsHer9Uc54eQX"
+    
     # the CID is "QmRHEymXX6dVvZFvMe1qbNUZvHp5nFXuEf7YHP6VoUBZRE"
     links = {
         "386": "link",
@@ -39,6 +43,16 @@ class IPFSDaemon(threading.Thread):
         self.port = PORT
         self.p2p_target = f"/ip4/127.0.0.1/{PROTOCOL}/{self.port}"
         self.stop()
+ 
+    # ─── BASIC METHODS ──────────────────────────────────────────────────────────────
+
+    # inicia el daemon
+    def run(self):
+        r = self.cmd("daemon --enable-pubsub-experiment")
+
+    # detiene el daemon
+    def stop(self):
+        os.system("pkill ipfs")
     
     # ejecuta comandos, comprueba errores y salida estandard
     def cmd(self, cmd):
@@ -49,25 +63,9 @@ class IPFSDaemon(threading.Thread):
         if r.stdout:
             return r.stdout.decode("utf-8")
         return "OK"
-    
-    # inicia el daemon
-    def run(self):
-        r = self.cmd("daemon --enable-pubsub-experiment")
-
-    # detiene el daemon
-    def stop(self):
-        os.system("pkill ipfs")
-
-
-    # devuelve true si el daemon está activo
-    @property
-    def is_active(self):
-        try:
-            self._api = ipfsapi.connect('127.0.0.1', 5001)
-            return True
-        except Exception:
-            return False
-
+ 
+    # ─── OTHER METHODS ────────────────────────────────────────────────────────────────────
+ 
     # espera a que la conexion esté activa
     def wait_connection(self):
         while not self.is_active:
@@ -87,7 +85,7 @@ class IPFSDaemon(threading.Thread):
         # creamos nuestro listen
         r = self.cmd(f"p2p listen --allow-custom-protocol {self.p2p_protocol} {self.p2p_target}")
         # añadimos el cid file
-        os.system(f"echo {self.cid} > /tmp/_cid.txt")
+        os.system(f"echo {self.cidcode} > /tmp/_cid.txt")
         r = self.cmd("add /tmp/_cid.txt")
 
     # instala el binario de ipfs
@@ -107,6 +105,15 @@ class IPFSDaemon(threading.Thread):
 
     # ─── PROPIEDADES ────────────────────────────────────────────────────────────────
 
+    # devuelve true si el daemon está activo
+    @property
+    def is_active(self):
+        try:
+            self._api = ipfsapi.connect('127.0.0.1', 5001)
+            return True
+        except Exception:
+            return False
+    
     @property
     def is_installed(self):
         filebin = Path("bin/ipfs")
@@ -164,6 +171,7 @@ class IPFSDaemon(threading.Thread):
 
 
 # ─── IPFS DAEMON STARTING ────────────────────────────────────────────────────────────
+
 def start_ipfsd(port, protocol):
     daemon = IPFSDaemon(port, protocol)
     # check if installed
@@ -181,4 +189,5 @@ def start_ipfsd(port, protocol):
     daemon.configure_options()
     logger.info("IPFS Daemon started")
     return daemon
+
 # ────────────────────────────────────────────────────────────────────────────────

@@ -48,7 +48,6 @@ def main(args):
         from ipfsmods.ipfs_daemon import start_ipfsd
         ipfsd = start_ipfsd(PORT, PROTOCOL)
 
-
         # cluster
         # from ipfs_cluster import IPFSCluster
         # cluster = IPFSCluster()
