@@ -1,3 +1,9 @@
+# ──────────────────────────────────────────────────────────────────────────────────── I ──────────
+#   :::::: S H I T   I P F S   D A E M O N   C L A S S : :  :   :    :     :        :          :
+# ──────────────────────────────────────────────────────────────────────────────────────────────
+#  ipfs daemon only is available for Go! and NodeJS, this is a custom shit binding
+#
+
 import os
 import sys
 import threading
@@ -5,19 +11,27 @@ import subprocess
 import ipfsapi
 import time
 import socket
+import requests
+import shutil
 from pathlib import Path
 
 from bitp2p import logger
 
-
 # ─── DAEMON ─────────────────────────────────────────────────────────────────────
+
 class IPFSDaemon(threading.Thread):
-    
-    errores = {
-        "ipfs: not found": "IPFS no está instalado",
-        "ipfs daemon is running": "IPFS ya está en marcha"
+    # cid is hash returned by ipfs
+    # when we add a file with this content:
+    # wYGC2SBWDre76hE52cNmFnkv2HKtXGt9Ck7rAnHtKD442W6vgshC5Hjp8Dqe8G9P
+    cid = "QmdT8vz7cLckhnpzw4trHwQWi1mCdrJ8rJsHer9Uc54eQX"
+    # the CID is "QmRHEymXX6dVvZFvMe1qbNUZvHp5nFXuEf7YHP6VoUBZRE"
+    links = {
+        "386": "link",
+        "amd64": "https://dist.ipfs.io/go-ipfs/v0.4.18/go-ipfs_v0.4.18_linux-amd64.tar.gz",
+        "arm": "link",
+        "arm64": ""
     }
-    
+
     def __init__(self, PORT, PROTOCOL):
         threading.Thread.__init__(self)
         self.setName("IPFSD")
@@ -28,7 +42,7 @@ class IPFSDaemon(threading.Thread):
     
     # ejecuta comandos, comprueba errores y salida estandard
     def cmd(self, cmd):
-        r = subprocess.run(f"./ipfs_bins/ipfs {cmd}", stderr=subprocess.PIPE, stdout=subprocess.PIPE, shell=True)
+        r = subprocess.run(f"./bin/ipfs {cmd}", stderr=subprocess.PIPE, stdout=subprocess.PIPE, shell=True)
         if r.stderr:
             logger.error(r.stderr.decode("utf-8"))
             return None
@@ -38,11 +52,6 @@ class IPFSDaemon(threading.Thread):
     
     # inicia el daemon
     def run(self):
-        # sino existe ninguna config la creamos
-        fileconfig = Path(f"{os.environ['HOME']}/.ipfs/config")
-        if not fileconfig.exists():
-            r = self.cmd("init")
-        # ejecutamos el daemon
         r = self.cmd("daemon --enable-pubsub-experiment")
 
     # detiene el daemon
@@ -67,14 +76,50 @@ class IPFSDaemon(threading.Thread):
             except KeyboardInterrupt:
                 break
     
-    def configure(self):
+    # raw config daemon
+    def configure_options(self):
         # activamos el p2pstream 
         r = self.cmd("config --json Experimental.Libp2pStreamMounting true")
+        # activamos relayhop
+        r = self.cmd("config --json Swarm.EnableRelayHop true")
         # cerramos los listen que puedan estar abiertos
         r = self.cmd("p2p close --all")
         # creamos nuestro listen
         r = self.cmd(f"p2p listen --allow-custom-protocol {self.p2p_protocol} {self.p2p_target}")
+        # añadimos el cid file
+        os.system(f"echo {self.cid} > /tmp/_cid.txt")
+        r = self.cmd("add /tmp/_cid.txt")
 
+    # instala el binario de ipfs
+    def install(self, arch="amd64"):
+        # descargar tar.gz
+        r = requests.get(self.links[arch])
+        with open("/tmp/ipfs.tar.gz", "wb") as code:
+            code.write(r.content)
+        # descomprime
+        shutil.unpack_archive('/tmp/ipfs.tar.gz', '/tmp/_ipfs')
+        os.system("mkdir -p bin")
+        os.system("mv /tmp/_ipfs/go-ipfs/ipfs bin/")
+    
+    # crea la configuracion inicial para ipfs
+    def init_config(self):
+        r = self.cmd("init")
+
+    # ─── PROPIEDADES ────────────────────────────────────────────────────────────────
+
+    @property
+    def is_installed(self):
+        filebin = Path("bin/ipfs")
+        if filebin.exists():
+            return True
+        return False
+
+    @property
+    def is_configured(self):
+        fileconfig = Path(f"{os.environ['HOME']}/.ipfs/config")
+        if fileconfig.exists():
+            return True
+        return False
     # ────────────────────────────────────────────────────────────────────────────────
 
 
@@ -121,11 +166,19 @@ class IPFSDaemon(threading.Thread):
 # ─── IPFS DAEMON STARTING ────────────────────────────────────────────────────────────
 def start_ipfsd(port, protocol):
     daemon = IPFSDaemon(port, protocol)
+    # check if installed
+    if not daemon.is_installed:
+        logger.info("IPFS was not found. Downloading...")
+        daemon.install()
+    if not daemon.is_configured:
+        logger.info("IPFS initial config not found. Making initial config...")
+        daemon.init_config()
     if daemon.is_active:
-        sys.exit("IPFS Daemon already running")
+        daemon.stop()
+        sys.exit("IPFS Daemon already running. Killing process...")
     daemon.start()
     daemon.wait_connection()
-    daemon.configure()
+    daemon.configure_options()
     logger.info("IPFS Daemon started")
     return daemon
 # ────────────────────────────────────────────────────────────────────────────────

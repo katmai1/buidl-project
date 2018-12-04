@@ -3,3 +3,5 @@ coloredlogs
 ipfsapi
 pprint
 schedule
+requests
+shutil
