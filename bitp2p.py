@@ -47,16 +47,16 @@ def main(args):
         global ipfsd
         from ipfsmods.ipfs_daemon import start_ipfsd
         ipfsd = start_ipfsd(PORT, PROTOCOL)
-
+        pprint(ipfsd.search_peers_by_cid())
         # cluster
         # from ipfs_cluster import IPFSCluster
         # cluster = IPFSCluster()
         # cluster.start()
         
         # ipfs events
-        # from ipfs_events import IPFSEvents  #, start_schedule
-        # ipfs_events = IPFSEvents()
-        # ipfs_events.start()
+        from ipfs_events import IPFSEvents  #, start_schedule
+        ipfs_events = IPFSEvents()
+        ipfs_events.start()
         
         # busca los nodos activos y se conecta
         # from ipfs_client import IPFSClient

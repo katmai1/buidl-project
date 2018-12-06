@@ -65,7 +65,10 @@ class IPFSDaemon(threading.Thread):
         return "OK"
  
     # ─── OTHER METHODS ────────────────────────────────────────────────────────────────────
- 
+    def search_peers_by_cid(self):
+        peers = self._api.dht_findprovs(self.cid)
+        return peers
+
     # espera a que la conexion esté activa
     def wait_connection(self):
         while not self.is_active:
@@ -86,7 +89,9 @@ class IPFSDaemon(threading.Thread):
         r = self.cmd(f"p2p listen --allow-custom-protocol {self.p2p_protocol} {self.p2p_target}")
         # añadimos el cid file
         os.system(f"echo {self.cidcode} > /tmp/_cid.txt")
-        r = self.cmd("add /tmp/_cid.txt")
+        self._api.add("/tmp/_cid.txt")
+        self._api.pin_add(self.cid)
+        # self.cmd(f"dht provide {self.cid}")
 
     # instala el binario de ipfs
     def install(self, arch="amd64"):

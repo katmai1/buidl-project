@@ -4,4 +4,3 @@ ipfsapi
 pprint
 schedule
 requests
-shutil
