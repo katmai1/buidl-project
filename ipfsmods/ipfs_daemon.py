@@ -66,7 +66,7 @@ class IPFSDaemon(threading.Thread):
     def connect_nodes_list(self):
         for key in self.nodes_list:
             print(key)
-            res = self._api.swarm_connect(f"/p2p-ciruit/ipfs/{key}")
+            res = self._api.swarm_connect(f"/p2p-circuit/ipfs/{key}")
             from pprint import pprint
             pprint(res)
 
