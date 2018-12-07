@@ -6,24 +6,14 @@ services:
     build: .
     image: bitp2p
     ports:
-        - "10000:10000"
-    environment:
-      PEERS: 'node1,node2'
-      PROFILE: nodo124
+        - "10003:10000"
 
   node1:
     image: bitp2p
     ports:
         - "10001:10000"
-    environment:
-      PEERS: 'node0,node2'
-      PROFILE: nodo532
 
   node2:
     image: bitp2p
     ports:
         - "10002:10000"
-    environment:
-      PEERS: 'node0,node1'
-      PROFILE: nodo521
-      

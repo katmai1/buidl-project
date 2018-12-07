@@ -47,32 +47,31 @@ def main(args):
         global ipfsd
         from ipfsmods.ipfs_daemon import start_ipfsd
         ipfsd = start_ipfsd(PORT, PROTOCOL)
-        pprint(ipfsd.search_peers_by_cid())
+        # pprint(ipfsd.search_peers_by_cid())
         # cluster
         # from ipfs_cluster import IPFSCluster
         # cluster = IPFSCluster()
         # cluster.start()
         
         # ipfs events
-        from ipfs_events import IPFSEvents  #, start_schedule
+        from ipfsmods.ipfs_events import IPFSEvents  #, start_schedule
         ipfs_events = IPFSEvents()
         ipfs_events.start()
         
         # busca los nodos activos y se conecta
-        # from ipfs_client import IPFSClient
-        # client = IPFSClient()
+        from ipfs_client import IPFSClient
+        client = IPFSClient()
 
         #pprint(client.peer_disconnect("QmSBqTujbU2cti6RTEy9VXnep7RGZVxJqYMuLSeeX2sc3Q"))
         
-        # all_peers = client.get_nodes_from_pubsub(PUBSUB)
-        # print(all_peers)
+        all_peers = client.get_nodes_from_pubsub(PUBSUB)
         # pprint(client.get_connected_peers())
         
-        # for peer in all_peers:
-        #     if client.peer_is_connected(peer):
-        #         logger.info("PEER Ya conectado")
-        #     else:
-        #         logger.info("Conectando al peer")
+        for peer in all_peers:
+            if client.peer_is_connected(peer):
+                logger.info("PEER Ya conectado")
+            else:
+                logger.info("Conectando al peer")
 
 
         # # schedule
