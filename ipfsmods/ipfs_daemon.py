@@ -65,10 +65,13 @@ class IPFSDaemon(threading.Thread):
     # ─── OTHER METHODS ────────────────────────────────────────────────────────────────────
     def connect_nodes_list(self):
         for key in self.nodes_list:
-            print(key)
-            res = self._api.swarm_connect(f"/p2p-circuit/ipfs/{key}")
-            from pprint import pprint
-            pprint(res)
+            if key != self.peer_id:
+                try:
+                    res = self._api.swarm_connect(f"/p2p-circuit/ipfs/{key}", )
+                    from pprint import pprint
+                    pprint(res)
+                except Exception as e:
+                    logger.error(f"Error al conectar con el peer {key}")
 
     def update_node_pool(self):
         self.nodes_list = self.get_peers_from_pool()
