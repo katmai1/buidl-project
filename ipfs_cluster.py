@@ -65,7 +65,7 @@ class IPFSCluster(threading.Thread):
         else:
             bootstrap_addr = self.get_bootstrap()
             for key in bootstrap_addr:
-                self._api.swarm_connect(f"/p2p-ciruit/ipfs/{bootstrap_addr[key]}")
+                self._api.swarm_connect(f"/p2p-circuit/ipfs/{bootstrap_addr[key]}")
                 r = self.cmd(f"daemon --bootstrap /p2p-circuit/ipfs/{key}")
 
     # ─── METODOS ────────────────────────────────────────────────────────────────────
