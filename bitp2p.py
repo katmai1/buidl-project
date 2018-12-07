@@ -59,19 +59,19 @@ def main(args):
         ipfs_events.start()
         
         # busca los nodos activos y se conecta
-        from ipfs_client import IPFSClient
-        client = IPFSClient()
+        # from ipfs_client import IPFSClient
+        # client = IPFSClient()
 
         #pprint(client.peer_disconnect("QmSBqTujbU2cti6RTEy9VXnep7RGZVxJqYMuLSeeX2sc3Q"))
         
-        all_peers = client.get_nodes_from_pubsub(PUBSUB)
-        # pprint(client.get_connected_peers())
+        # all_peers = client.get_nodes_from_pubsub(PUBSUB)
+        # pprint(all_peers)
         
-        for peer in all_peers:
-            if client.peer_is_connected(peer):
-                logger.info("PEER Ya conectado")
-            else:
-                logger.info("Conectando al peer")
+        # for peer in all_peers:
+        #     if client.peer_is_connected(peer):
+        #         logger.info("PEER Ya conectado")
+        #     else:
+        #         logger.info("Conectando al peer")
 
 
         # # schedule

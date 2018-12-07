@@ -13,6 +13,7 @@ import time
 import socket
 import requests
 import shutil
+from uuid import uuid4
 from pathlib import Path
 
 from bitp2p import logger
@@ -21,12 +22,7 @@ from bitp2p import logger
 
 class IPFSDaemon(threading.Thread):
 
-    # cid is hash returned by ipfs
-    # when we add a file with this content:
-    # wYGC2SBWDre76hE52cNmFnkv2HKtXGt9Ck7rAnHtKD442W6vgshC5Hjp8Dqe8G9P
-    # ? esto quizas va en otra clase
-    cidcode = "wYGC2SBWDre76hE52cNmFnkv2HKtXGt9Ck7rAnHtKD442W6vgshC5Hjp8Dqe8G9P"
-    cid = "QmdT8vz7cLckhnpzw4trHwQWi1mCdrJ8rJsHer9Uc54eQX"
+    nodes_pool_address = "QmRvrDWLYAKZVR5swXqvVpiRzovJfYZZQVJYrpdHiiaPhi"
     
     # the CID is "QmRHEymXX6dVvZFvMe1qbNUZvHp5nFXuEf7YHP6VoUBZRE"
     links = {
@@ -38,12 +34,14 @@ class IPFSDaemon(threading.Thread):
 
     def __init__(self, PORT, PROTOCOL):
         threading.Thread.__init__(self)
+        self.node_id = uuid4().hex
         self.setName("IPFSD")
         self.p2p_protocol = "/x/myproto"
         self.port = PORT
+        self.nodes_list = {}
         self.p2p_target = f"/ip4/127.0.0.1/{PROTOCOL}/{self.port}"
         self.stop()
- 
+
     # ─── BASIC METHODS ──────────────────────────────────────────────────────────────
 
     # inicia el daemon
@@ -65,9 +63,20 @@ class IPFSDaemon(threading.Thread):
         return "OK"
  
     # ─── OTHER METHODS ────────────────────────────────────────────────────────────────────
-    def search_peers_by_cid(self):
-        peers = self._api.dht_findprovs(self.cid)
-        return peers
+    def update_node_pool(self):
+        self.nodes_list = self.get_peers_from_pool()
+        self.put_peers_to_pool()
+
+    def get_peers_from_pool(self):
+        logger.info("Obteniendo peers... (puede tardar algun minuto)")
+        resolved_addr = self._api.name_resolve(self.nodes_pool_address)['Path']
+        return self._api.get_json(resolved_addr)
+    
+    def put_peers_to_pool(self):
+        self.nodes_list[self.peer_id] = self.node_id
+        new_addr = self._api.add_json(self.nodes_list)
+        self._dd = self._api.name_publish(new_addr, resolve=False, lifetime="24h", key="nodes_pool")
+        logger.info("Added peers into dns")
 
     # espera a que la conexion esté activa
     def wait_connection(self):
@@ -87,11 +96,6 @@ class IPFSDaemon(threading.Thread):
         r = self.cmd("p2p close --all")
         # creamos nuestro listen
         r = self.cmd(f"p2p listen --allow-custom-protocol {self.p2p_protocol} {self.p2p_target}")
-        # añadimos el cid file
-        os.system(f"echo {self.cidcode} > /tmp/_cid.txt")
-        self._api.add("/tmp/_cid.txt")
-        self._api.pin_add(self.cid)
-        # self.cmd(f"dht provide {self.cid}")
 
     # instala el binario de ipfs
     def install(self, arch="amd64"):
@@ -109,6 +113,10 @@ class IPFSDaemon(threading.Thread):
         r = self.cmd("init")
 
     # ─── PROPIEDADES ────────────────────────────────────────────────────────────────
+
+    @property
+    def peer_id(self):
+        return self._api.id()['ID']
 
     # devuelve true si el daemon está activo
     @property
@@ -193,6 +201,7 @@ def start_ipfsd(port, protocol):
     daemon.wait_connection()
     daemon.configure_options()
     logger.info("IPFS Daemon started")
+    daemon.update_node_pool()
     return daemon
 
 # ────────────────────────────────────────────────────────────────────────────────
