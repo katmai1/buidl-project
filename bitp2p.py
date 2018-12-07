@@ -47,12 +47,11 @@ def main(args):
         global ipfsd
         from ipfsmods.ipfs_daemon import start_ipfsd
         ipfsd = start_ipfsd(PORT, PROTOCOL)
-        # pprint(ipfsd.search_peers_by_cid())
+
         # cluster
-        # from ipfs_cluster import IPFSCluster
-        # cluster = IPFSCluster()
-        # cluster.start()
-        
+        from ipfs_cluster import start_cluster_service
+        clusterd = start_cluster_service()
+            
         # ipfs events
         from ipfsmods.ipfs_events import IPFSEvents  #, start_schedule
         ipfs_events = IPFSEvents()

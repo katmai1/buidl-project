@@ -212,7 +212,7 @@ def start_ipfsd(port, protocol):
     daemon.wait_connection()
     daemon.configure_options()
     logger.info("IPFS Daemon started")
-    daemon.update_node_pool()
+    # daemon.update_node_pool()
     return daemon
 
 # ────────────────────────────────────────────────────────────────────────────────
