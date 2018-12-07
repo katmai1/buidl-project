@@ -6,14 +6,42 @@ services:
     build: .
     image: bitp2p
     ports:
-        - "10003:10000"
+        - "10000:10000"
+    environment:
+      CLUSTER_GENESIS: "false"
 
-  node1:
-    image: bitp2p
-    ports:
-        - "10001:10000"
+  # node1:
+  #   image: bitp2p
+  #   ports:
+  #       - "10001:10000"
+  #   environment:
+  #     CLUSTER_GENESIS: "false"
 
-  node2:
-    image: bitp2p
-    ports:
-        - "10002:10000"
+  # node2:
+  #   image: bitp2p
+  #   ports:
+  #       - "10002:10000"
+  #   environment:
+  #     CLUSTER_GENESIS: "false"
+
+  # node3:
+  #   build: .
+  #   image: bitp2p
+  #   ports:
+  #       - "10003:10000"
+  #   environment:
+  #     CLUSTER_GENESIS: "false"
+
+  # node4:
+  #   image: bitp2p
+  #   ports:
+  #       - "10004:10000"
+  #   environment:
+  #     CLUSTER_GENESIS: "false"
+
+  # node5:
+  #   image: bitp2p
+  #   ports:
+  #       - "10005:10000"
+  #   environment:
+  #     CLUSTER_GENESIS: "false"

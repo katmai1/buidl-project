@@ -37,14 +37,14 @@ class IPFSCluster(threading.Thread):
         os.environ['CLUSTER_SECRET'] = self.secret
         self._api = ipfsapi.connect('127.0.0.1', 5001)
         self.bootstrap_list = {}
+        self.first = True
         self.peer_id = peer_id
 
     # ejecuta comandos, comprueba errores y salida estandard
     def cmd(self, cmd):
         r = subprocess.run("bin/ipfs-cluster-service " + cmd, stderr=subprocess.PIPE, stdout=subprocess.PIPE, shell=True)
         if r.stderr:
-            logger.error(r.stderr.decode("utf-8"))
-            return None
+            return r.stderr.decode("utf-8")
         if r.stdout:
             return r.stdout.decode("utf-8")
         return "OK"
@@ -63,13 +63,21 @@ class IPFSCluster(threading.Thread):
         if os.environ['CLUSTER_GENESIS'] == "true":
             r = self.cmd("daemon")
         else:
-            bootstrap_addr = self.get_bootstrap()
-            for key in bootstrap_addr:
-                try:
-                    r = self.cmd(f"daemon --bootstrap {key}")
-                    logger.info("Conectado al peer del cluster")
-                except Exception as e:
-                    logger.error("error al connectar al peer")
+            if self.first:
+                bootstrap_addr = self.get_bootstrap()
+                for key in bootstrap_addr:
+                    lista = eval(str(bootstrap_addr[key]))
+                    for i in lista:
+                        if not "127.0.0.1" in i and not "circuit" in i:
+                            try:
+                                self.first = False
+                                logger.info("Conectando al peer del cluster")
+                                r = self.cmd(f"daemon --bootstrap {i}")
+                                logger.info(r)
+                            except Exception as e:
+                                logger.error("error al connectar al peer")
+            else:
+                r = self.cmd("daemon")
 
     # ─── METODOS ────────────────────────────────────────────────────────────────────
     def get_bootstrap(self):
@@ -79,7 +87,7 @@ class IPFSCluster(threading.Thread):
     def update_bootstrap_pool(self):
         from bitp2p import ipfsd
         bootstrap_id = self.ctl('id')['id']
-        bootstraps = self.ctl('id')['addresses']
+        bootstraps = list(self.ctl('id')['addresses'])
         self.bootstrap_list[bootstrap_id] = bootstraps
         new_addr = self._api.add_json(self.bootstrap_list)
         self._dd = self._api.name_publish(new_addr, resolve=False, lifetime="24h", key="nodes_pool")
