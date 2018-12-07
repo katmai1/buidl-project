@@ -63,8 +63,16 @@ class IPFSDaemon(threading.Thread):
         return "OK"
  
     # ─── OTHER METHODS ────────────────────────────────────────────────────────────────────
+    def connect_nodes_list(self):
+        for key in self.nodes_list:
+            print(key)
+            res = self._api.swarm_connect(f"/p2p-ciruit/ipfs/{key}")
+            from pprint import pprint
+            pprint(res)
+
     def update_node_pool(self):
         self.nodes_list = self.get_peers_from_pool()
+        self.connect_nodes_list()
         self.put_peers_to_pool()
 
     def get_peers_from_pool(self):
