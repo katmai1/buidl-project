@@ -96,6 +96,7 @@ class IPFSDaemon(threading.Thread):
         r = self.cmd("p2p close --all")
         # creamos nuestro listen
         r = self.cmd(f"p2p listen --allow-custom-protocol {self.p2p_protocol} {self.p2p_target}")
+        os.system(f"cp ipfsmods/nodes_pool {os.environ['HOME']}/.ipfs/keystore/")
 
     # instala el binario de ipfs
     def install(self, arch="amd64"):
