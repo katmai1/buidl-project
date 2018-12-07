@@ -69,7 +69,7 @@ class IPFSCluster(threading.Thread):
 
     # ─── METODOS ────────────────────────────────────────────────────────────────────
     def get_bootstrap(self):
-        resolved_addr = self._api.name_resolve(self.nodes_pool_address)['Path']
+        resolved_addr = self._api.name_resolve(self.bootstrap_pool_address)['Path']
         return self._api.get_json(resolved_addr)
 
     def update_bootstrap_pool(self):
