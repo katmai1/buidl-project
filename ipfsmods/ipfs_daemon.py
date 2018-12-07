@@ -68,8 +68,7 @@ class IPFSDaemon(threading.Thread):
             if key != self.peer_id:
                 try:
                     res = self._api.swarm_connect(f"/p2p-circuit/ipfs/{key}", )
-                    from pprint import pprint
-                    pprint(res)
+                    logger.info(f"Connectado al peer {key}")
                 except Exception as e:
                     logger.error(f"Error al conectar con el peer {key}")
 
