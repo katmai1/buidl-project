@@ -6,42 +6,48 @@ services:
     build: .
     image: bitp2p
     ports:
-        - "10000:10000"
+      - "10000:10000"
+    environment:
+      CLUSTER_GENESIS: 'true'
+      CLUSTER_SECRET: 'de57552e3682afd6942a237df4ac58c8283c2dae6f1933da8aea5a2dcf9bc157'
+
+  node1:
+    image: bitp2p
+    ports:
+        - "10001:10000"
     environment:
       CLUSTER_GENESIS: "false"
+      CLUSTER_SECRET: "de57552e3682afd6942a237df4ac58c8283c2dae6f1933da8aea5a2dcf9bc157"
 
-  # node1:
-  #   image: bitp2p
-  #   ports:
-  #       - "10001:10000"
-  #   environment:
-  #     CLUSTER_GENESIS: "false"
+  node2:
+    image: bitp2p
+    ports:
+        - "10002:10000"
+    environment:
+      CLUSTER_GENESIS: "false"
+      CLUSTER_SECRET: "de57552e3682afd6942a237df4ac58c8283c2dae6f1933da8aea5a2dcf9bc157"
 
-  # node2:
-  #   image: bitp2p
-  #   ports:
-  #       - "10002:10000"
-  #   environment:
-  #     CLUSTER_GENESIS: "false"
+  node3:
+    build: .
+    image: bitp2p
+    ports:
+        - "10003:10000"
+    environment:
+      CLUSTER_GENESIS: "false"
+      CLUSTER_SECRET: "de57552e3682afd6942a237df4ac58c8283c2dae6f1933da8aea5a2dcf9bc157"
 
-  # node3:
-  #   build: .
-  #   image: bitp2p
-  #   ports:
-  #       - "10003:10000"
-  #   environment:
-  #     CLUSTER_GENESIS: "false"
+  node4:
+    image: bitp2p
+    ports:
+        - "10004:10000"
+    environment:
+      CLUSTER_GENESIS: "false"
+      CLUSTER_SECRET: "de57552e3682afd6942a237df4ac58c8283c2dae6f1933da8aea5a2dcf9bc157"
 
-  # node4:
-  #   image: bitp2p
-  #   ports:
-  #       - "10004:10000"
-  #   environment:
-  #     CLUSTER_GENESIS: "false"
-
-  # node5:
-  #   image: bitp2p
-  #   ports:
-  #       - "10005:10000"
-  #   environment:
-  #     CLUSTER_GENESIS: "false"
+  node5:
+    image: bitp2p
+    ports:
+        - "10005:10000"
+    environment:
+      CLUSTER_GENESIS: "false"
+      CLUSTER_SECRET: "de57552e3682afd6942a237df4ac58c8283c2dae6f1933da8aea5a2dcf9bc157"

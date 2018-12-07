@@ -115,6 +115,7 @@ class IPFSCluster(threading.Thread):
     
     # crea la configuracion inicial para ipfs
     def init_config(self):
+        os.system(f"rm -rf {os.environ['HOME']}/.ipfs-cluster")
         r = self.cmd("init")
 
     # ─── PROPIEDADES ────────────────────────────────────────────────────────────────
