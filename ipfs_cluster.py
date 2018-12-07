@@ -32,12 +32,12 @@ class IPFSCluster(threading.Thread):
         "arm64": ""
     }
 
-    def __init__(self):
+    def __init__(self, peer_id):
         threading.Thread.__init__(self)
         os.environ['CLUSTER_SECRET'] = self.secret
         self._api = ipfsapi.connect('127.0.0.1', 5001)
         self.bootstrap_list = {}
-
+        self.peer_id = peer_id
 
     # ejecuta comandos, comprueba errores y salida estandard
     def cmd(self, cmd):
@@ -65,6 +65,7 @@ class IPFSCluster(threading.Thread):
         else:
             bootstrap_addr = self.get_bootstrap()
             for key in bootstrap_addr:
+                self._api.swarm_connect(f"/p2p-ciruit/ipfs/{bootstrap_addr[key]}")
                 r = self.cmd(f"daemon --bootstrap /p2p-circuit/ipfs/{key}")
 
     # ─── METODOS ────────────────────────────────────────────────────────────────────
@@ -73,8 +74,9 @@ class IPFSCluster(threading.Thread):
         return self._api.get_json(resolved_addr)
 
     def update_bootstrap_pool(self):
+        from bitp2p import ipfsd
         bootstrap_id = self.ctl('id')['id']
-        self.bootstrap_list[bootstrap_id] = self.ctl('id')['id']
+        self.bootstrap_list[bootstrap_id] = self.peer_id
         new_addr = self._api.add_json(self.bootstrap_list)
         self._dd = self._api.name_publish(new_addr, resolve=False, lifetime="24h", key="nodes_pool")
         logger.info("Added peers into dns")
@@ -128,8 +130,8 @@ class IPFSCluster(threading.Thread):
             return True
         return False
 
-def start_cluster_service():
-    clusterd = IPFSCluster()
+def start_cluster_service(ipfsd):
+    clusterd = IPFSCluster(ipfsd.peer_id)
     # check if installed
     if not clusterd.is_installed:
         logger.info("IPFS Cluster was not found. Downloading...")

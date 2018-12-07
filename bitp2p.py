@@ -50,7 +50,7 @@ def main(args):
 
         # cluster
         from ipfs_cluster import start_cluster_service
-        clusterd = start_cluster_service()
+        clusterd = start_cluster_service(ipfsd)
             
         # ipfs events
         from ipfsmods.ipfs_events import IPFSEvents  #, start_schedule
