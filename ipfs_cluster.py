@@ -65,8 +65,11 @@ class IPFSCluster(threading.Thread):
         else:
             bootstrap_addr = self.get_bootstrap()
             for key in bootstrap_addr:
-                self._api.swarm_connect(f"/p2p-circuit/ipfs/{bootstrap_addr[key]}")
-                r = self.cmd(f"daemon --bootstrap /p2p-circuit/ipfs/{key}")
+                try:
+                    r = self.cmd(f"daemon --bootstrap {key}")
+                    logger.info("Conectado al peer del cluster")
+                except Exception as e:
+                    logger.error("error al connectar al peer")
 
     # ─── METODOS ────────────────────────────────────────────────────────────────────
     def get_bootstrap(self):
@@ -76,7 +79,8 @@ class IPFSCluster(threading.Thread):
     def update_bootstrap_pool(self):
         from bitp2p import ipfsd
         bootstrap_id = self.ctl('id')['id']
-        self.bootstrap_list[bootstrap_id] = self.peer_id
+        bootstraps = self.ctl('id')['addresses']
+        self.bootstrap_list[bootstrap_id] = bootstraps
         new_addr = self._api.add_json(self.bootstrap_list)
         self._dd = self._api.name_publish(new_addr, resolve=False, lifetime="24h", key="nodes_pool")
         logger.info("Added peers into dns")
