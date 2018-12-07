@@ -15,7 +15,6 @@ from bitp2p import logger
 
 class IPFSCluster(threading.Thread):
 
-    bootstrap = "/ip4/192.168.20.155/tcp/9096/ipfs/QmUAnGjgve8PsNdkSsBwfDrSxgfXrMrzgEhfKj13CPzbmt"
     secret = "de57552e3682afd6942a237df4ac58c8283c2dae6f1933da8aea5a2dcf9bc157"
     bootstrap_pool_address = "QmRvrDWLYAKZVR5swXqvVpiRzovJfYZZQVJYrpdHiiaPhi"
 
