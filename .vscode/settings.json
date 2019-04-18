@@ -1,4 +1,9 @@
 {
     "python.pythonPath": "/home/q/anaconda3/envs/curso/bin/python",
-    "python.linting.pylintEnabled": true
+    "python.linting.pylintEnabled": true,
+    "workbench.colorCustomizations": {
+        "activityBar.background": "#006666",
+        "titleBar.activeBackground": "#006666",
+        "titleBar.activeForeground": "#FEFCFD"
+    }
 }
